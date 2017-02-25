@@ -10,7 +10,7 @@ class Display:
 		self.board = board
 		
 		self.fallingTetro = None
-		self.fallingSpaces = [] #This will hold the four blocks of the current tetro
+		self.fallingBlocks = [] #This will hold the four blocks of the current tetro
 		
 		self.master.title("Tetris")
 		self.master.geometry("300x300")
@@ -34,13 +34,27 @@ class Display:
 	def downPressed(self):
 		print "The user has pressed down"
 		#Check to see if there's anything below
-		for space in self.fallingSpaces:
-			oldBox = self.getBox(space)
-			newBox = self.getBox(
+		oldBoxes = self.fallingBlocks
+		newBoxes = [self.getBoxDown(oldBox) for oldBox in oldBoxes]
+		for oldBox in oldBoxes: oldBox.activate()
+		for newBox in newBoxes: newBox.activate()
+		self.fallingBlocks = newBoxes
 	def leftPressed(self):
 		print "The user has pressed left"
+		#Check to see if there's anything to the left
+		oldBoxes = self.fallingBlocks
+		newBoxes = [self.getBoxLeft(oldBox) for oldBox in oldBoxes]
+		for oldBox in oldBoxes: oldBox.activate()
+		for newBox in newBoxes: newBox.activate()
+		self.fallingBlocks = newBoxes
 	def rightPressed(self):
 		print "The user has pressed right"
+		#Check to see if there's anything to the right
+		oldBoxes = self.fallingBlocks
+		newBoxes = [self.getBoxRight(oldBox) for oldBox in oldBoxes]
+		for oldBox in oldBoxes: oldBox.activate()
+		for newBox in newBoxes: newBox.activate()
+		self.fallingBlocks = newBoxes
 	def endTurn(self): #This is called when a piece lands at the bottom
 		#This is not yet optimized. It is only for testing.
 		for row in range(0,self.board.depth):
@@ -53,12 +67,19 @@ class Display:
 			if currentBox.get():#If there's already something there
 				print "A tetro should have been added, but there was a box already checked."
 			currentBox.activate()
-			self.fallingSpaces.append(startingPos)
+			self.fallingBlocks.append(currentBox)
 		self.fallingTetro = tetro
 	def getBox(self, dimensions): 
 		return self.gameGrid.getBox(dimensions)
-	#def getBoxBelow(self, dimensions):
-	#	return self.gameGrid.getBox([dimensions[0],dimensions[1]
+	def getBoxDown(self, oldBox):
+		dimensions = [oldBox.col,oldBox.row]
+		return self.gameGrid.getBox([dimensions[0],dimensions[1]+1])
+	def getBoxLeft(self, oldBox):
+		dimensions = [oldBox.col,oldBox.row]
+		return self.gameGrid.getBox([dimensions[0]-1,dimensions[1]])
+	def getBoxRight(self, oldBox):
+		dimensions = [oldBox.col,oldBox.row]
+		return self.gameGrid.getBox([dimensions[0]+1,dimensions[1]])
 			
 class GameGrid:
 	def __init__(self,father,master=Tk()):
@@ -98,10 +119,14 @@ class Box:
 		self.master = master
 		self.checkBox = Checkbutton(self.master,variable=self.intVar,command=self.hitBox)
 		self.checkBox.var = self.intVar
+		self.row = -1
+		self.col = -1
 	def get(self):
 		return self.isChecked
 	def grid(self,row,col):
 		self.checkBox.grid(row=row,column=col)
+		self.row = row
+		self.col = col
 	def hitBox(self):
 		#print "You hit a box. Good for you."
 		self.isChecked = not self.isChecked
