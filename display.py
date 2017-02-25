@@ -72,14 +72,17 @@ class Display:
 	def getBox(self, dimensions): 
 		return self.gameGrid.getBox(dimensions)
 	def getBoxDown(self, oldBox):
+		direction = Direction.D
 		dimensions = [oldBox.col,oldBox.row]
-		return self.gameGrid.getBox([dimensions[0],dimensions[1]+1])
+		return self.gameGrid.getBox([dimensions[0]+Direction.colMod[direction],dimensions[1]+Direction.rowMod[direction]])
 	def getBoxLeft(self, oldBox):
+		direction = Direction.L
 		dimensions = [oldBox.col,oldBox.row]
-		return self.gameGrid.getBox([dimensions[0]-1,dimensions[1]])
+		return self.gameGrid.getBox([dimensions[0]+Direction.colMod[direction],dimensions[1]+Direction.rowMod[direction]])
 	def getBoxRight(self, oldBox):
+		direction = Direction.R
 		dimensions = [oldBox.col,oldBox.row]
-		return self.gameGrid.getBox([dimensions[0]+1,dimensions[1]])
+		return self.gameGrid.getBox([dimensions[0]+Direction.colMod[direction],dimensions[1]+Direction.rowMod[direction]])
 			
 class GameGrid:
 	def __init__(self,father,master=Tk()):
@@ -133,3 +136,14 @@ class Box:
 	def __str__(self):
 		return "#" if self.get() else "0"
 	def activate(self): self.checkBox.invoke()
+class Direction:
+	#def __init__(self,rowModifier,colModifier,letterRep):
+	#	self.rowModifier = rowModifier
+	#	self.colModifier = colModifier
+	#	self.letterRep = letterRep
+	D = "Down"#Direction(1,0,"D")#Down
+	L = "Left"#Direction(0,-1,"L")#Left
+	R = "Right"#Direction(0,1,"R")#Right
+	rowMod = {D:1,L:0,R:0}
+	colMod = {D:0,L:-1,R:1}
+	
