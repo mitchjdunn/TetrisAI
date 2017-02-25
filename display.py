@@ -25,18 +25,14 @@ class Display:
 			"printGrid":Button(master,text="printGrid",command=self.gameGrid.printGrid)}
 		for key in self.buttons:
 			self.buttons[key].pack()
-			
-		#print "Adding an L tetro"
-		L = Tetro("L",self.board)
-		self.addTetro(L)
-		#print "Finished adding L tetro"
+		self.beginGame()
 		mainloop()
+	def beginGame(self):
+		self.endTurn()
 	def downPressed(self):
-		print "The user has pressed down"
 		#Check to see if there's anything below
 		oldBoxes = self.fallingBlocks
 		deepest = max([oldBox.row for oldBox in oldBoxes])
-		print "Deepest: ",deepest
 		if deepest == self.board.depth-1:
 			self.endTurn()
 			return
@@ -48,7 +44,6 @@ class Display:
 		for newBox in newBoxes: newBox.activate()
 		self.fallingBlocks = newBoxes
 	def leftPressed(self):
-		print "The user has pressed left"
 		#Check to see if there's anything to the left
 		oldBoxes = self.fallingBlocks
 		newBoxes = [self.getBoxLeft(oldBox) for oldBox in oldBoxes]
@@ -59,7 +54,6 @@ class Display:
 		for newBox in newBoxes: newBox.activate()
 		self.fallingBlocks = newBoxes
 	def rightPressed(self):
-		print "The user has pressed right"
 		#Check to see if there's anything to the right
 		oldBoxes = self.fallingBlocks
 		newBoxes = [self.getBoxRight(oldBox) for oldBox in oldBoxes]
@@ -77,8 +71,6 @@ class Display:
 		return False
 	def endTurn(self): #This is called when a piece lands at the bottom
 		#This is not yet optimized. It is only for testing.
-		print "1:"
-		print self.gameGrid
 		for row in range(1,self.board.depth):
 			if self.gameGrid.rowIsFull(row):
 				#add points
@@ -91,11 +83,7 @@ class Display:
 							toBeReplaced.activate()
 				self.gameGrid.emptyRow(0) #Clearing the top row
 				#print "YE A ROW IS FULL"
-		print "2:"
-		print self.gameGrid
-		self.addTetro(Tetro("L",self.board))#Make it so the type of tetro is random
-		print "3:"
-		print self.gameGrid
+		self.addTetro(Tetro.randomTetro(self.board))#("L",self.board))Make it so the type of tetro is random
 	#def hasBlock(self,dimensions): return self.getBox(dimensions).get()
 	def addTetro(self, tetro):
 		self.fallingTetro = tetro
@@ -179,10 +167,6 @@ class Box:
 		return "#" if self.get() else "0"
 	def activate(self): self.checkBox.invoke()
 class Direction:
-	#def __init__(self,rowModifier,colModifier,letterRep):
-	#	self.rowModifier = rowModifier
-	#	self.colModifier = colModifier
-	#	self.letterRep = letterRep
 	D = "Down"#Direction(1,0,"D")#Down
 	L = "Left"#Direction(0,-1,"L")#Left
 	R = "Right"#Direction(0,1,"R")#Right
