@@ -26,16 +26,24 @@ class Display:
 		for key in self.buttons:
 			self.buttons[key].pack()
 			
-		print "Adding an L tetro"
+		#print "Adding an L tetro"
 		L = Tetro("L",self.board)
 		self.addTetro(L)
-		print "Finished adding L tetro"
+		#print "Finished adding L tetro"
 		mainloop()
 	def downPressed(self):
 		print "The user has pressed down"
 		#Check to see if there's anything below
 		oldBoxes = self.fallingBlocks
+		deepest = max([oldBox.row for oldBox in oldBoxes])
+		print "Deepest: ",deepest
+		if deepest == self.board.depth-1:
+			self.endTurn()
+			return
 		newBoxes = [self.getBoxDown(oldBox) for oldBox in oldBoxes]
+		if self.directionBlocked(oldBoxes,newBoxes): #This will end the turn
+			self.endTurn()
+			return #We dont' want to update the boxes below if the turn ends
 		for oldBox in oldBoxes: oldBox.activate()
 		for newBox in newBoxes: newBox.activate()
 		self.fallingBlocks = newBoxes
@@ -44,6 +52,9 @@ class Display:
 		#Check to see if there's anything to the left
 		oldBoxes = self.fallingBlocks
 		newBoxes = [self.getBoxLeft(oldBox) for oldBox in oldBoxes]
+		if self.directionBlocked(oldBoxes,newBoxes):
+			print "That direction is blocked."
+			return
 		for oldBox in oldBoxes: oldBox.activate()
 		for newBox in newBoxes: newBox.activate()
 		self.fallingBlocks = newBoxes
@@ -52,16 +63,43 @@ class Display:
 		#Check to see if there's anything to the right
 		oldBoxes = self.fallingBlocks
 		newBoxes = [self.getBoxRight(oldBox) for oldBox in oldBoxes]
+		if self.directionBlocked(oldBoxes,newBoxes):
+			print "That direction is blocked."
+			return
 		for oldBox in oldBoxes: oldBox.activate()
 		for newBox in newBoxes: newBox.activate()
 		self.fallingBlocks = newBoxes
+	def directionBlocked(self,oldBoxes,newBoxes):
+		for newBox in newBoxes:
+			if newBox not in oldBoxes:
+				if newBox.get():
+					return True
+		return False
 	def endTurn(self): #This is called when a piece lands at the bottom
 		#This is not yet optimized. It is only for testing.
-		for row in range(0,self.board.depth):
+		print "1:"
+		print self.gameGrid
+		for row in range(1,self.board.depth):
 			if self.gameGrid.rowIsFull(row):
-				print "YE A ROW IS FULL"
+				#add points
+				print "You've cleared a row!"
+				for row2 in range(row,0,-1):
+					for col in range(0,self.board.width):
+						toBeReplaced = self.gameGrid.boxes[row2][col]
+						toReplace = self.gameGrid.boxes[row2-1][col]
+						if not (toBeReplaced.get() == toReplace.get()):
+							toBeReplaced.activate()
+				self.gameGrid.emptyRow(0) #Clearing the top row
+				#print "YE A ROW IS FULL"
+		print "2:"
+		print self.gameGrid
+		self.addTetro(Tetro("L",self.board))#Make it so the type of tetro is random
+		print "3:"
+		print self.gameGrid
 	#def hasBlock(self,dimensions): return self.getBox(dimensions).get()
 	def addTetro(self, tetro):
+		self.fallingTetro = tetro
+		self.fallingBlocks = []
 		for startingPos in tetro.spaces:
 			currentBox = self.getBox(startingPos)
 			if currentBox.get():#If there's already something there
@@ -115,6 +153,10 @@ class GameGrid:
 		return True
 	def getBox(self, dimensions):
 		return self.boxes[dimensions[1]][dimensions[0]]
+	def emptyRow(self, row):
+		for col in range(0,self.father.board.width):
+			if self.boxes[row][col].get():
+				self.boxes[row][col].activate()
 class Box:
 	def __init__(self,master):
 		self.intVar = IntVar()
