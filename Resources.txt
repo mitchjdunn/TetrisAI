@@ -1,2 +1,5 @@
 http://blog.thedigitalcatonline.com/blog/2015/02/11/default-arguments-in-python/#.WLDMZTvyuUk
 http://tetris.wikia.com/wiki/Tetris_Guideline
+http://stackoverflow.com/questions/6480441/2d-array-of-objects-in-python
+http://effbot.org/tkinterbook/checkbutton.htm
+https://www.dotnetperls.com/2d-python
