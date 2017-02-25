@@ -7,7 +7,7 @@ class Display:
 		self.board = board
 		
 		self.master.title("Tetris")
-		
+		self.master.geometry("300x300")
 		Label(master, text = "Play Tetris!\n\n").pack()
 		
 		self.gameGrid = GameGrid(self)
@@ -30,7 +30,7 @@ class Display:
 	def endTurn(self): #This is called when a piece lands at the bottom
 		#This is not yet optimized. It is only for testing.
 		for row in range(0,self.board.height):
-			if self.gameGrid.checkFullRow(row):
+			if self.gameGrid.rowIsFull(row):
 				print "YE A ROW IS FULL"
 class GameGrid:
 	def __init__(self,father,master=Tk()):
@@ -40,17 +40,27 @@ class GameGrid:
 		for row in range(0,self.father.board.height):
 			for col in range(0,self.father.board.width):
 				self.boxes[row][col].grid(row,col)
-				
-	def checkFullRow(self,row):
-		for intVar in self.checkVars[row]:
-			intVal = intVar.get()
-			if intVal==1:
-				return 1
-		return 0
 	def printGrid(self):
+		print(str(self))
+	def getBoolGrid(self):
+		boolGrid = [[False for col in range(self.father.board.width)] for row in range(self.father.board.height)]
 		for row in range(0,self.father.board.height):
-			print [box.get() for box in self.boxes[row]]
-		print "\n\n"
+			for col in range(0,self.father.board.width):
+				boolGrid[row][col] = self.boxes[row][col].get()
+		return boolGrid
+	def __str__(self):
+		boolGrid = self.getBoolGrid()
+		s=""
+		for row in range(0,self.father.board.height):
+			for col in range(0,self.father.board.width):
+				s+=str(self.boxes[row][col])
+			s+="\n"
+		return s
+	def rowIsFull(self,row):
+		boolGrid = self.getBoolGrid()
+		for col in range(0,self.father.board.width):
+			if not boolGrid[row][col]: return False
+		return True
 class Box:
 	def __init__(self,master):
 		self.intVar = IntVar()
@@ -65,3 +75,5 @@ class Box:
 	def hitBox(self):
 		#print "You hit a box. Good for you."
 		self.isChecked = not self.isChecked
+	def __str__(self):
+		return "#" if self.get() else "0"
