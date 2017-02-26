@@ -25,10 +25,29 @@ class Display:
 			"printGrid":Button(master,text="printGrid",command=self.gameGrid.printGrid)}
 		for key in self.buttons:
 			self.buttons[key].pack()
+		
+		
+		
+		Label(self.master,text="Click here for keyboard input").pack()
+		master.bind("<Key>",self.pressedKey)
+		
+		
 		self.beginGame()
 		mainloop()
+	def pressedKey(self,key):
+		keyChar = key.char
+		#print "A key was pressed: ",keyChar
+		if keyChar in Direction.keyCharToDirection:
+			self.directionPressed(Direction.keyCharToDirection[keyChar])
 	def beginGame(self):
 		self.endTurn()
+	def directionPressed(self,d):
+		if d not in Direction.directions:
+			print "You pressed a direction, but it's invalid."
+		if d == Direction.D: self.downPressed()
+		elif d == Direction.L: self.leftPressed()
+		elif d == Direction.R: self.rightPressed()
+		
 	def downPressed(self):
 		#Check to see if there's anything below
 		oldBoxes = self.fallingBlocks
@@ -118,6 +137,7 @@ class GameGrid:
 		for row in range(0,self.father.board.depth):
 			for col in range(0,self.father.board.width):
 				self.boxes[row][col].grid(row,col)
+		
 	def printGrid(self):
 		print(str(self))
 	def getBoolGrid(self):
@@ -170,6 +190,8 @@ class Direction:
 	D = "Down"#Direction(1,0,"D")#Down
 	L = "Left"#Direction(0,-1,"L")#Left
 	R = "Right"#Direction(0,1,"R")#Right
+	directions = [D,L,R]
 	rowMod = {D:1,L:0,R:0}
 	colMod = {D:0,L:-1,R:1}
+	keyCharToDirection = {'a':L,'A':L,'d':R,'D':R,'s':D,'S':D}
 	
