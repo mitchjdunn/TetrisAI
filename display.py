@@ -30,34 +30,24 @@ class Display:
 		keyChar = key.char
 		if keyChar in Direction.keyCharToDirection:
 			self.directionPressed(Direction.keyCharToDirection[keyChar])
-	def beginGame(self):
-		self.endTurn()
+	def beginGame(self):self.endTurn()
 	def directionPressed(self,d):
 		if d not in Direction.directions:
 			print "You pressed a direction, but it's invalid."
-		if d == Direction.D: self.downPressed()
-		elif (d == Direction.L) | (d == Direction.R): self.horizontalPressed(d)
-		
-	def downPressed(self):
-		#Check to see if there's anything below
+			return
 		oldBoxes = self.fallingBlocks
 		deepest = max([oldBox.row for oldBox in oldBoxes])
-		if deepest == self.board.depth-1:
+		if (deepest == self.board.depth-1) & (d == Direction.D):
 			self.endTurn()
 			return
-		newBoxes = [self.getBoxToDirection(oldBox,Direction.D) for oldBox in oldBoxes]
-		if self.directionBlocked(oldBoxes,newBoxes): #This will end the turn
-			self.endTurn()
-			return #We dont' want to update the boxes below if the turn ends
-		for oldBox in oldBoxes: oldBox.activate()
-		for newBox in newBoxes: newBox.activate()
-		self.fallingBlocks = newBoxes
-	def horizontalPressed(self,d):
-		oldBoxes = self.fallingBlocks
 		newBoxes = [self.getBoxToDirection(oldBox,d) for oldBox in oldBoxes]
 		if self.directionBlocked(oldBoxes,newBoxes):
-			print "That direction is blocked."
-			return
+			if (d==Direction.D):
+				self.endTurn()
+				return
+			else:
+				print "That direction is blocked."
+				return
 		for oldBox in oldBoxes: oldBox.activate()
 		for newBox in newBoxes: newBox.activate()
 		self.fallingBlocks = newBoxes
@@ -80,9 +70,7 @@ class Display:
 						if not (toBeReplaced.get() == toReplace.get()):
 							toBeReplaced.activate()
 				self.gameGrid.emptyRow(0) #Clearing the top row
-				#print "YE A ROW IS FULL"
-		self.addTetro(Tetro.randomTetro(self.board))#("L",self.board))Make it so the type of tetro is random
-	#def hasBlock(self,dimensions): return self.getBox(dimensions).get()
+		self.addTetro(Tetro.randomTetro(self.board))
 	def addTetro(self, tetro):
 		self.fallingTetro = tetro
 		self.fallingBlocks = []
@@ -153,15 +141,14 @@ class Box:
 		self.row = row
 		self.col = col
 	def hitBox(self):
-		#print "You hit a box. Good for you."
 		self.isChecked = not self.isChecked
 	def __str__(self):
 		return "#" if self.get() else "0"
 	def activate(self): self.checkBox.invoke()
 class Direction:
-	D = "Down"#Direction(1,0,"D")#Down
-	L = "Left"#Direction(0,-1,"L")#Left
-	R = "Right"#Direction(0,1,"R")#Right
+	D = "Down"
+	L = "Left"
+	R = "Right"
 	directions = [D,L,R]
 	rowMod = {D:1,L:0,R:0}
 	colMod = {D:0,L:-1,R:1}
