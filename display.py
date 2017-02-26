@@ -18,14 +18,6 @@ class Display:
 		
 		self.gameGrid = GameGrid(self)
 		
-		self.buttons = {"down":Button(master,text="down",command=self.downPressed),
-			"left":Button(master,text="left",command=self.leftPressed),
-			"right":Button(master,text="right",command=self.rightPressed),
-			"endTurn":Button(master,text="endTurn",command=self.endTurn),
-			"printGrid":Button(master,text="printGrid",command=self.gameGrid.printGrid)}
-		for key in self.buttons:
-			self.buttons[key].pack()
-		
 		
 		
 		Label(self.master,text="Click here for keyboard input").pack()
@@ -36,7 +28,6 @@ class Display:
 		mainloop()
 	def pressedKey(self,key):
 		keyChar = key.char
-		#print "A key was pressed: ",keyChar
 		if keyChar in Direction.keyCharToDirection:
 			self.directionPressed(Direction.keyCharToDirection[keyChar])
 	def beginGame(self):
@@ -45,8 +36,7 @@ class Display:
 		if d not in Direction.directions:
 			print "You pressed a direction, but it's invalid."
 		if d == Direction.D: self.downPressed()
-		elif d == Direction.L: self.leftPressed()
-		elif d == Direction.R: self.rightPressed()
+		elif (d == Direction.L) | (d == Direction.R): self.horizontalPressed(d)
 		
 	def downPressed(self):
 		#Check to see if there's anything below
@@ -55,27 +45,16 @@ class Display:
 		if deepest == self.board.depth-1:
 			self.endTurn()
 			return
-		newBoxes = [self.getBoxDown(oldBox) for oldBox in oldBoxes]
+		newBoxes = [self.getBoxToDirection(oldBox,Direction.D) for oldBox in oldBoxes]
 		if self.directionBlocked(oldBoxes,newBoxes): #This will end the turn
 			self.endTurn()
 			return #We dont' want to update the boxes below if the turn ends
 		for oldBox in oldBoxes: oldBox.activate()
 		for newBox in newBoxes: newBox.activate()
 		self.fallingBlocks = newBoxes
-	def leftPressed(self):
-		#Check to see if there's anything to the left
+	def horizontalPressed(self,d):
 		oldBoxes = self.fallingBlocks
-		newBoxes = [self.getBoxLeft(oldBox) for oldBox in oldBoxes]
-		if self.directionBlocked(oldBoxes,newBoxes):
-			print "That direction is blocked."
-			return
-		for oldBox in oldBoxes: oldBox.activate()
-		for newBox in newBoxes: newBox.activate()
-		self.fallingBlocks = newBoxes
-	def rightPressed(self):
-		#Check to see if there's anything to the right
-		oldBoxes = self.fallingBlocks
-		newBoxes = [self.getBoxRight(oldBox) for oldBox in oldBoxes]
+		newBoxes = [self.getBoxToDirection(oldBox,d) for oldBox in oldBoxes]
 		if self.directionBlocked(oldBoxes,newBoxes):
 			print "That direction is blocked."
 			return
@@ -117,17 +96,10 @@ class Display:
 	def getBox(self, dimensions): 
 		return self.gameGrid.getBox(dimensions)
 	def getBoxDown(self, oldBox):
-		direction = Direction.D
+		return self.getBoxToDirection(oldBox,Direction.D)
+	def getBoxToDirection(self,oldBox,d):
 		dimensions = [oldBox.col,oldBox.row]
-		return self.gameGrid.getBox([dimensions[0]+Direction.colMod[direction],dimensions[1]+Direction.rowMod[direction]])
-	def getBoxLeft(self, oldBox):
-		direction = Direction.L
-		dimensions = [oldBox.col,oldBox.row]
-		return self.gameGrid.getBox([dimensions[0]+Direction.colMod[direction],dimensions[1]+Direction.rowMod[direction]])
-	def getBoxRight(self, oldBox):
-		direction = Direction.R
-		dimensions = [oldBox.col,oldBox.row]
-		return self.gameGrid.getBox([dimensions[0]+Direction.colMod[direction],dimensions[1]+Direction.rowMod[direction]])
+		return self.gameGrid.getBox([dimensions[0]+Direction.colMod[d],dimensions[1]+Direction.rowMod[d]])
 			
 class GameGrid:
 	def __init__(self,father,master=Tk()):
