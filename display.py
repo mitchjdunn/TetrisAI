@@ -36,9 +36,17 @@ class Display:
 			print "You pressed a direction, but it's invalid."
 			return
 		oldBoxes = self.fallingBlocks
-		deepest = max([oldBox.row for oldBox in oldBoxes])
-		if (deepest == self.board.depth-1) & (d == Direction.D):
+		downMost = max([oldBox.row for oldBox in oldBoxes])
+		leftMost = min([oldBox.col for oldBox in oldBoxes])
+		rightMost = max([oldBox.col for oldBox in oldBoxes])
+		if (downMost == self.board.depth-1) & (d == Direction.D):
 			self.endTurn()
+			return
+		elif (leftMost==0) & (d==Direction.L):
+			print "User tried to go left at the furthest left possible"
+			return
+		elif (rightMost==self.board.width-1) & (d==Direction.R):
+			print "User tried to go right at furthest right possible"
 			return
 		newBoxes = [self.getBoxToDirection(oldBox,d) for oldBox in oldBoxes]
 		if self.directionBlocked(oldBoxes,newBoxes):
