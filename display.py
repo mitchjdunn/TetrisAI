@@ -1,6 +1,8 @@
 import Tkinter
 from Tkinter import *
 from board import *
+import agent
+from agent import *
 #Note: A "Box" is just a space. A "block" is a box that holds a piece. A "Tetro" is one of the four-blocked pieces in a Tetris game.
 #I need to work on the dimensions. I think I"m confusing rows and columns. It can either be [column,row] or [row][column]
 #Rows should count down.
@@ -8,7 +10,7 @@ class Display:
 	def __init__(self, master=Tk(),board=Board()):
 		self.master = master
 		self.board = board
-		
+		self.input = KeyboardInput(self) #Make it a choice later
 		self.fallingTetro = None
 		self.fallingBlocks = [] #This will hold the four blocks of the current tetro
 		
@@ -18,14 +20,24 @@ class Display:
 		
 		self.gameGrid = GameGrid(self)
 		
+		self.points = 0
 		
+		self.scoreText = StringVar()
+		self.scoreText.set("Score: "+str(self.points))
+		self.scoreLabel = Label(self.master,textvariable=self.scoreText)
+		self.scoreLabel.pack()
 		
-		Label(self.master,text="Click here for keyboard input").pack()
-		master.bind("<Key>",self.pressedKey)
+		#Label(self.master,text="Click here for keyboard input").pack()
+		#master.bind("<Key>",self.pressedKey)
 		
 		
 		self.beginGame()
 		mainloop()
+	def rowCleared(self):
+		print "You've cleared a row!"
+		self.points+=1
+		self.scoreText.set("Score: "+str(self.points))
+		#self.scoreLabel.config["text"]("Score: "+str(self.points))
 	def pressedKey(self,key):
 		keyChar = key.char
 		if keyChar in Direction.keyCharToDirection:
@@ -36,9 +48,9 @@ class Display:
 			print "You pressed a direction, but it's invalid."
 			return
 		oldBoxes = self.fallingBlocks
-		downMost = max([oldBox.row for oldBox in oldBoxes])
-		leftMost = min([oldBox.col for oldBox in oldBoxes])
-		rightMost = max([oldBox.col for oldBox in oldBoxes])
+		downMost = max([oldBox.dim["row"] for oldBox in oldBoxes])
+		leftMost = min([oldBox.dim["col"] for oldBox in oldBoxes])
+		rightMost = max([oldBox.dim["col"] for oldBox in oldBoxes])
 		if (downMost == self.board.depth-1) & (d == Direction.D):
 			self.endTurn()
 			return
@@ -69,8 +81,7 @@ class Display:
 		#This is not yet optimized. It is only for testing.
 		for row in range(1,self.board.depth):
 			if self.gameGrid.rowIsFull(row):
-				#add points
-				print "You've cleared a row!"
+				self.rowCleared()
 				for row2 in range(row,0,-1):
 					for col in range(0,self.board.width):
 						toBeReplaced = self.gameGrid.boxes[row2][col]
@@ -94,17 +105,17 @@ class Display:
 	def getBoxDown(self, oldBox):
 		return self.getBoxToDirection(oldBox,Direction.D)
 	def getBoxToDirection(self,oldBox,d):
-		dimensions = [oldBox.col,oldBox.row]
+		dimensions = [oldBox.dim["col"],oldBox.dim["row"]]
 		return self.gameGrid.getBox([dimensions[0]+Direction.colMod[d],dimensions[1]+Direction.rowMod[d]])
 			
 class GameGrid:
 	def __init__(self,father,master=Tk()):
 		self.master = master
 		self.father = father
-		self.boxes = [[Box(self.master) for col in range(self.father.board.width)] for row in range(self.father.board.depth)]
+		self.boxes = [[Box(self.master,row,col) for col in range(self.father.board.width)] for row in range(self.father.board.depth)]
 		for row in range(0,self.father.board.depth):
 			for col in range(0,self.father.board.width):
-				self.boxes[row][col].grid(row,col)
+				self.boxes[row][col].grid()
 		
 	def printGrid(self):
 		print(str(self))
@@ -134,20 +145,17 @@ class GameGrid:
 			if self.boxes[row][col].get():
 				self.boxes[row][col].activate()
 class Box:
-	def __init__(self,master):
+	def __init__(self,master,row,col):
 		self.intVar = IntVar()
 		self.isChecked = False #This is stupid, but I've tried for HOURS getting the other way to work and it won't. LIterally hours. 2/25/17 from 8am to 3:13pm.
 		self.master = master
 		self.checkBox = Checkbutton(self.master,variable=self.intVar,command=self.hitBox)
 		self.checkBox.var = self.intVar
-		self.row = -1
-		self.col = -1
+		self.dim={"row":row,"col":col}
 	def get(self):
 		return self.isChecked
-	def grid(self,row,col):
-		self.checkBox.grid(row=row,column=col)
-		self.row = row
-		self.col = col
+	def grid(self):
+		self.checkBox.grid(row=self.dim["row"],column=self.dim["col"])
 	def hitBox(self):
 		self.isChecked = not self.isChecked
 	def __str__(self):
