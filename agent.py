@@ -7,14 +7,6 @@ from board import *
 class Input:
 	def __init__(self, parent):
 		self.parent = parent
-	#def moveDown():
-	#	parent.directionPressed(Direction.D)
-	#def moveLeft():
-	#	parent.directionPressed(Direction.L)
-	#def moveRight():
-	#	parent.directionPressed(Direction.R)
-#class Agent(Input):
-#	print "hi"
 class KeyboardInput(Input):
 	def __init__(self, parent):
 		self.parent = parent
@@ -26,6 +18,14 @@ class KeyboardInput(Input):
 		self.master.bind("<Key>",self.pressedKey)
 	def pressedKey(self,key):
 		self.parent.pressedKey(key)
-		#keyChar = key.char
-		#if keyChar in Direction.keyCharToDirection:
-		#	self.directionPressed(Direction.keyCharToDirection[keyChar])
+class Agent(Input):
+	def __init__(self, parent):
+		self.parent = parent
+	def getPath(self):
+		#Call when a new tetro is added
+		#This should return a list of actions (directions) to get the tetro to a good place
+	def getCost(self):
+		print "nope"
+		#Do we need this? Does Tetris really have a "cost" for the movement of tetros?
+	def getHeuristic(self):
+		
