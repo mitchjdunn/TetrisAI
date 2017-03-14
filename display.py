@@ -71,6 +71,12 @@ class Display:
 		for oldBox in oldBoxes: oldBox.activate()
 		for newBox in newBoxes: newBox.activate()
 		self.fallingBlocks = newBoxes
+	def rotate(self):
+		#Since tetris games have different rules for rotation,
+		#we will have to press rotate, then get a screenshot for the new board.
+		#Also, we will only rotate in one direction.
+		#TODO get a screenshot of the board after having pressed "rotate"
+		
 	def directionBlocked(self,oldBoxes,newBoxes):
 		for newBox in newBoxes:
 			if newBox not in oldBoxes:
